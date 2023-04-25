@@ -4,7 +4,7 @@ import shutil
 import os
 from PIL import ImageTk, Image
 
-path = "C:/Users/Shruti/Desktop/Python_handson/dicom_files/MRBRAIN.DCM";
+path = "C:/Users/Shruti/Desktop/Python_handson/dicom_files/0015.DCM";
 ds = pydicom.dcmread(path)
 print(ds)
 
