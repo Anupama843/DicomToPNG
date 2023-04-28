@@ -16,7 +16,7 @@ def dicom_to_csv(dicom_file):
             ])
 
 
-listOfFiles = ['./file/test1.dcm', './file/test2.dcm', './file/test3.dcm', './file/test4.dcm', './file/test5.dcm', './file/0002.DCM']
-for file in listOfFiles:
-    dicom_to_csv(file)
+# listOfFiles = ['./file/test1.dcm', './file/test2.dcm', './file/test3.dcm', './file/test4.dcm', './file/test5.dcm', './file/0002.DCM']
+# for file in listOfFiles:
+#     dicom_to_csv(file)
 
