@@ -1,0 +1,27 @@
+
+h1{
+    text-align: center;
+    margin: 1rem;
+}
+
+th {
+    border: 1px solid black;
+    position: sticky;
+    top: 0;
+    background-color: #f2f2f2;
+}
+td {
+    border: 1px solid black;
+    word-wrap: break-word;
+}
+table{
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 100%;
+}
+.table-container {
+    max-height: 600px;
+    overflow: auto;
+}
+
+
