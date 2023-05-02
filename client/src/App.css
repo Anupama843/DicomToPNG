@@ -1,6 +1,8 @@
 .dicomImageConverterApp {
   display: flex;
   flex-direction: column;
+  border-style:groove;
+  border-width: medium;
 }
 
 .appHeader {
@@ -9,6 +11,8 @@
   flex-direction: row;
   justify-content: space-between;
   padding: 10px; 
+  border-style:groove;
+  border-width: medium;
 }
 
 .imageUploadSection {
@@ -19,6 +23,8 @@
 .dicomFileDetails {
   display: flex;
   flex-direction: row;
+  border-style:groove;
+  border-width: medium;
   
 }
 
@@ -28,6 +34,9 @@
   height: 50%;
 }
 
+.convertedImageSection h2{
+  text-align: center;
+}
 .convertedImageSection img{
   flex: 1;
   width: 100%;
