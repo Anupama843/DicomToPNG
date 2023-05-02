@@ -3,7 +3,6 @@ import './App.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import CSVReader from 'react-csv-reader'
 import ImageGallery from 'react-image-gallery';
-import FileViewer from 'react-file-viewer';
 import CsvPreview from './CsvPreview'
 
 function App() {
@@ -12,6 +11,7 @@ function App() {
   const [singlePngImage, setSinglePngImage] = useState(null);
   const [error, setError] = useState(null);
   const [csvMetaData, setCsvMetaData] = useState(null);
+
 
   const handleFileChange = (e) => {
     setDicomFile(e.target.files[0]);
@@ -35,7 +35,8 @@ function App() {
       console.log("data.metadata =>>>>> ");
       console.log(data.metadata);
       if (data.image) {
-        setSinglePngImage(`data:image/png;base64,${data.image}`);
+        // setSinglePngImage(`data:image/png;base64,${data.image}`);
+        setSinglePngImage(data.image);
         setMultiplePngImages(null);
         console.log("single image");
         console.log(data.image);
@@ -52,6 +53,40 @@ function App() {
     }
   };
 
+  const handleDownload = (image_index) => {
+    let url = "/download";
+    console.log("download button clicked")
+    if (image_index !== undefined) {
+        console.log("single frame")
+        url += `?image_idx=${image_index}`;
+    }
+    fetch(url, {
+        method: "GET", 
+      })
+      .then((response) => {
+        console.log("in download react response");
+        console.log(response);
+        return response.blob();
+      })
+      .then((blob) => {
+        const url = window.URL.createObjectURL(blob);
+        console.log("url:");
+        console.log(url);
+        const link = document.createElement("a");
+
+        if (image_index !== undefined) {
+            link.setAttribute("download", "converted_image.png");
+        } else {
+            link.setAttribute("download", "converted_images.zip");
+        }
+
+        link.href = url;
+        // link.setAttribute("download", "converted_images.zip");
+        document.body.appendChild(link);
+        link.click();
+      });
+  };
+
   const papaparseOptions = {
     header: true,
     dynamicTyping: true,
@@ -61,8 +96,6 @@ function App() {
         .toLowerCase()
         .replace(/\W/g, '_')
   }
-  const file = 'http://example.com/image.png'
-  const type = 'CSV'
 
   return (
     <div className='dicomImageConverterApp'>
@@ -79,15 +112,30 @@ function App() {
 
           {/* {pngImage && <img src={pngImage} alt="Converted PNG image" />} */}
           {/* {pngImage && <ImageSlider folderLink={pngImage}/>} */}
-
-          {multiplePngImages && <ImageGallery items={multiplePngImages} />}
-          {singlePngImage && <img src={singlePngImage} alt="Converted PNG image" />}
+          {multiplePngImages && (<div>
+            <h2> Converted PNG Image </h2>
+            <ImageGallery 
+              items={multiplePngImages} 
+              showFullscreenButton={true}
+              showPlayButton={true}
+              showThumbnails={true}/>
+            <button onClick={() => handleDownload()}>Download</button></div>
+          )}
+          {singlePngImage && (
+          <div>
+            <h2> Converted PNG Image </h2>
+            <ImageGallery 
+            items={singlePngImage} 
+            showFullscreenButton={true}
+            showPlayButton={false}
+            showThumbnails={true}/>
+            <button onClick={() => handleDownload(0)}>Download</button>
+          </div>)}
         </div>
         <div className='dicomMetadataSection'>
           {csvMetaData
             && <CsvPreview metadata={csvMetaData}/>}
-        </div>
-        {csvMetaData && (
+          {csvMetaData && (
           <a
             href={`data:text/csv;charset=utf-8,${escape(csvMetaData)}`}
             download="metadata.csv"
@@ -95,6 +143,8 @@ function App() {
             download
           </a>
         )}
+        </div>
+        
       </div>
 
     </div>

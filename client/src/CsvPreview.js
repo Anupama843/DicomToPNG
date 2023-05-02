@@ -31,7 +31,7 @@ function CsvPreview({ metadata }) {
 
     return (
         <div style={{ textAlign: "center" }}>
-            <h1>Metadata </h1>
+            <h2>Metadata </h2>
             <div className='table-container'>
                 <table>
                     <thead>
