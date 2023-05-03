@@ -16,6 +16,20 @@ app = Flask(__name__)
 
 @app.route('/convert', methods=['POST'])
 def convert_dicom_to_png():
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded. Please upload Dicom Image file'})
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'Uploaded file is empty'})
+
+    _, ext = os.path.splitext(file.filename)
+    print("extension")
+    print(ext)
+    if ext.lower() != '.dcm':
+        print("inside error handling")
+        return jsonify({'success': False, 'error': 'Not a dicom file. Only ".DCM" or ".dcm" dicom image files are supported'})
+    
     global final_path
     global new_dir
     dicom_file = request.files['file']
@@ -70,13 +84,28 @@ def convert_dicom_to_png():
 
     # metadata = dicom_to_csv(ds)
     metadata = metadata_extraction.dicom_to_csv(ds)
-
+    if(metadata == ""):
+        return jsonify({'success': False, 'error': 'Metadata conversion failed'})
+    
     if ds.pixel_array.ndim == 2:
-        # converted_image = singleframe_dicom_converter.singleframe_dicom_converter(filename, final_path, new_dir)
-        return jsonify({'success': True, 'image': [], 'metadata': metadata})
+        print("upload dicom image is single frame")
+        try:
+            converted_image = singleframe_dicom_converter.singleframe_dicom_converter(ds, final_path, new_dir)
+            return jsonify({'success': True, 'image': converted_image, 'metadata': metadata})
+        except Exception as e:
+            print("Exception is :")
+            print(e)
+            return jsonify({'success': False, 'error': 'Single frame dicom image conversion failed'})
+            
     elif ds.pixel_array.ndim == 3:
-        # converted_images = multiframe_dicom_converter.multiframe_dicom_converter(filename, final_path, new_dir)
-        return jsonify({'success': True, 'images': [], 'metadata': metadata})
+        print("upload dicom image is multi frame")
+        try:
+            converted_images = multiframe_dicom_converter.multiframe_dicom_converter(ds, final_path, new_dir)
+            return jsonify({'success': True, 'images': converted_images, 'metadata': metadata})
+        except Exception as e:
+            print("Exception is :")
+            print(e)
+            return jsonify({'success': False, 'error': 'Multi frame dicom image conversion failed'})
     else:
         return jsonify({'success': False, 'error': 'Invalid DICOM image'})
     

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import CSVReader from 'react-csv-reader'
 import ImageGallery from 'react-image-gallery';
 import CsvPreview from './CsvPreview'
 
@@ -16,6 +15,10 @@ function App() {
 
   const handleFileChange = (e) => {
     setDicomFile(e.target.files[0]);
+    setError(null)
+    setMultiplePngImages(null)
+    setSinglePngImage(null)
+    setCsvMetaData(null)
   };
 
   const handleConvert = async () => {
@@ -23,11 +26,17 @@ function App() {
     const formData = new FormData();
     formData.append('file', dicomFile);
 
+    setIsConvertInProgress(true)
+    setError(null)
+    setMultiplePngImages(null)
+    setSinglePngImage(null)
+    setCsvMetaData(null)
+
     const response = await fetch('/convert', {
       method: 'POST',
       body: formData
     });
-    setIsConvertInProgress(true)
+    
     const data = await response.json();
     console.log("data:");
     console.log(data);
@@ -48,9 +57,12 @@ function App() {
       setCsvMetaData(atob(data.metadata))
       setError(null);
     } else {
+      console.log("Encountered error")
+      console.log(data.error);
       setMultiplePngImages(null);
       setSinglePngImage(null);
-      setError(data.message);
+      setCsvMetaData(null);
+      setError(data.error);
     }
   };
 
@@ -88,6 +100,24 @@ function App() {
       });
   };
 
+  const downloadMetaData = () => {
+  
+    // Create download link
+    console.log("in metadata download function")
+    var link = document.createElement("a");
+    link.setAttribute("href", "data:text/csv;charset=utf-8," + encodeURIComponent(csvMetaData));
+    link.setAttribute("download", "metadata.csv");
+    link.style.display = "none";
+    document.body.appendChild(link);
+  
+    // Click download link
+    link.click();
+  
+    // Remove download link from DOM
+    document.body.removeChild(link);
+  }
+  
+
   const papaparseOptions = {
     header: true,
     dynamicTyping: true,
@@ -104,10 +134,15 @@ function App() {
         <h1>DICOM to PNG Converter</h1>
         <div className='imageUploadSection'>
           <input type="file" onChange={handleFileChange} />
-          <button onClick={handleConvert}>Convert</button>
-          {error && <p>{error}</p>}
+          <button id="convertButton" onClick={handleConvert}>Convert</button>
+          {/* {error && <p>{error}</p>} */}
         </div>
       </div>
+      {error && 
+        <div className='errorMessageSection'>
+          <h4>{error}</h4>
+        </div>
+      }
       {isConvertInProgress && <span>Converting...</span>}
       {!isConvertInProgress &&
         <div className='dicomFileDetails'>
@@ -122,7 +157,10 @@ function App() {
                 showFullscreenButton={true}
                 showPlayButton={true}
                 showThumbnails={true} />
-              <button onClick={() => handleDownload()}>Download</button></div>
+              <div className='downloadButtonsSection'>
+                <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+              </div>
+            </div>
             )}
             {singlePngImage && (
               <div>
@@ -132,19 +170,18 @@ function App() {
                   showFullscreenButton={true}
                   showPlayButton={false}
                   showThumbnails={true} />
-                <button onClick={() => handleDownload(0)}>Download</button>
+                <div className='downloadButtonsSection'>
+                  <button id="downloadSingleImageButton"  onClick={() => handleDownload(0)}>Download</button>
+                </div>
               </div>)}
           </div>
           <div className='dicomMetadataSection'>
             {csvMetaData
               && <CsvPreview metadata={csvMetaData} />}
             {csvMetaData && (
-              <a
-                href={`data:text/csv;charset=utf-8,${escape(csvMetaData)}`}
-                download="metadata.csv"
-              >
-                download
-              </a>
+              <div className='downloadButtonsSection'>
+                <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+              </div>
             )}
           </div>
         </div>}

@@ -13,29 +13,42 @@
   padding: 10px; 
   border-style:groove;
   border-width: medium;
+  background-color:rgb(30, 40, 51);
+}
+.appHeader h1{
+  color: white;
 }
 
 .imageUploadSection {
   margin-top: 2rem;
+  color: white;
 }
 
+#convertButton{
+  color: rgb(30, 40, 51);
+}
 
 .dicomFileDetails {
   display: flex;
   flex-direction: row;
-  border-style:groove;
-  border-width: medium;
-  
+  border-style:groove;  
 }
 
 .convertedImageSection{
   flex: 1;
+  position: relative;
   width: 50%;
   height: 50%;
+  background-color: white;
 }
 
+#downloadMultiImagesButton, #downloadSingleImageButton{
+  position: absolute;
+  bottom: 0px;
+}
 .convertedImageSection h2{
   text-align: center;
+  color: rgb(30, 40, 51)
 }
 .convertedImageSection img{
   flex: 1;
@@ -47,4 +60,25 @@
   width: 50%;
   height: 50%;
   padding-left: 2rem;
+  position: relative;
+}
+
+#downloadMetadataButton{
+  position: absolute;
+  bottom: 0px;
+}
+
+.errorMessageSection{
+  text-align: center;
+  color: red;
+}
+
+.downloadButtonsSection{
+  display: inline-block;
+  margin-top: 10px;
+}
+
+#downloadMetaDataButton, #downloadSingleImageButton, #downloadMultiImagesButton  {
+  background-color: rgb(30, 40, 51);
+  color: white;
 }

@@ -11,11 +11,13 @@ import os
 
 def multiframe_dicom_converter(dicom_file, final_path, new_dir):
     
-    ds = pydicom.dcmread(dicom_file)
+    ds = dicom_file
+    filename = dicom_file.filename
+    convertedImages = []
     if ds.pixel_array.ndim == 3:
         # Multi-frame image
         print("inside multi-frame dicom image")
-        convertedImages = []
+    
         converted_zipfile_images = []
         for i, frame in enumerate(ds.pixel_array):
             pixel_array = frame
@@ -44,8 +46,8 @@ def multiframe_dicom_converter(dicom_file, final_path, new_dir):
             convertedImages.append({
                 'original': f'data:image/png;base64,{im_base64}',
                 'thumbnail': f'data:image/png;base64,{im_base64}',
-                'originalAlt': dicom_file,
-                'thumbnailAlt': dicom_file
+                'originalAlt': filename,
+                'thumbnailAlt': filename
             })
 
         # Create a zip file of all converted PNG images
@@ -55,5 +57,5 @@ def multiframe_dicom_converter(dicom_file, final_path, new_dir):
                 print(img)
                 zip.write(img)
 
-        return convertedImages
+    return convertedImages
     
