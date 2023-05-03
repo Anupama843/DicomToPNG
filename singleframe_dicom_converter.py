@@ -8,7 +8,8 @@ import os
 
 def singleframe_dicom_converter(dicom_file, final_path, new_dir):
     
-    ds = pydicom.dcmread(dicom_file)
+    ds = dicom_file
+    filename = dicom_file.filename
     pixel_array = ds.pixel_array
     print("final_path: " + final_path)
     print("new dir:" + new_dir)
@@ -38,8 +39,8 @@ def singleframe_dicom_converter(dicom_file, final_path, new_dir):
         convertedImage.append({
                 'original': f'data:image/png;base64,{im_base64}',
                 'thumbnail': f'data:image/png;base64,{im_base64}',
-                'originalAlt': dicom_file,
-                'thumbnailAlt': dicom_file
+                'originalAlt': filename,
+                'thumbnailAlt': filename
         })
 
         return convertedImage
