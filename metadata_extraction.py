@@ -9,12 +9,11 @@ def get_dicom_Data(dicom_file):
 
 def dicom_to_csv(dicom_file):
     print("dicom_file ====>>>> ")
-    print(dicom_file)
-    ds = get_dicom_Data(dicom_file)
-    print("dicom_file ====>>>>")
-    print(dicom_file)
-    filename = os.path.splitext(dicom_file)[0] + '.csv'
-    return dicom_data_to_csv_data(ds, filename)
+    
+    ds = dicom_file #get_dicom_Data(dicom_file)
+    
+    # filename = os.path.splitext(dicom_file)[0] + '.csv'
+    return dicom_data_to_csv_data(ds, 'converted_file.csv')
 
 def dicom_data_to_csv_data(ds, filename):
     with open(filename, 'w', newline='') as csvfile:

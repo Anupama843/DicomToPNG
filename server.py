@@ -25,7 +25,8 @@ def convert_dicom_to_png():
     #filename_metadata = os.path.splitext(dicom_file)[0] + '.csv'
     print("filename : " + filename)
     ds = pydicom.dcmread(dicom_file)
-
+    print("ds ========>>>> ")
+    print(ds)
 
     # create folder to save converted dicom images
     parent_dir = './convertedimages'
@@ -68,14 +69,14 @@ def convert_dicom_to_png():
 
 
     # metadata = dicom_to_csv(ds)
-    metadata = metadata_extraction.dicom_to_csv(dicom_file.filename)
+    metadata = metadata_extraction.dicom_to_csv(ds)
 
     if ds.pixel_array.ndim == 2:
-        converted_image = singleframe_dicom_converter.singleframe_dicom_converter(filename, final_path, new_dir)
-        return jsonify({'success': True, 'image': converted_image, 'metadata': metadata})
+        # converted_image = singleframe_dicom_converter.singleframe_dicom_converter(filename, final_path, new_dir)
+        return jsonify({'success': True, 'image': [], 'metadata': metadata})
     elif ds.pixel_array.ndim == 3:
-        converted_images = multiframe_dicom_converter.multiframe_dicom_converter(filename, final_path, new_dir)
-        return jsonify({'success': True, 'images': converted_images, 'metadata': metadata})
+        # converted_images = multiframe_dicom_converter.multiframe_dicom_converter(filename, final_path, new_dir)
+        return jsonify({'success': True, 'images': [], 'metadata': metadata})
     else:
         return jsonify({'success': False, 'error': 'Invalid DICOM image'})
     

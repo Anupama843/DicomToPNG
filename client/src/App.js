@@ -11,6 +11,7 @@ function App() {
   const [singlePngImage, setSinglePngImage] = useState(null);
   const [error, setError] = useState(null);
   const [csvMetaData, setCsvMetaData] = useState(null);
+  const [isConvertInProgress, setIsConvertInProgress] = useState(false);
 
 
   const handleFileChange = (e) => {
@@ -26,11 +27,11 @@ function App() {
       method: 'POST',
       body: formData
     });
-
+    setIsConvertInProgress(true)
     const data = await response.json();
     console.log("data:");
     console.log(data);
-
+    setIsConvertInProgress(false)
     if (data.success) {
       console.log("data.metadata =>>>>> ");
       console.log(data.metadata);
@@ -57,12 +58,12 @@ function App() {
     let url = "/download";
     console.log("download button clicked")
     if (image_index !== undefined) {
-        console.log("single frame")
-        url += `?image_idx=${image_index}`;
+      console.log("single frame")
+      url += `?image_idx=${image_index}`;
     }
     fetch(url, {
-        method: "GET", 
-      })
+      method: "GET",
+    })
       .then((response) => {
         console.log("in download react response");
         console.log(response);
@@ -75,9 +76,9 @@ function App() {
         const link = document.createElement("a");
 
         if (image_index !== undefined) {
-            link.setAttribute("download", "converted_image.png");
+          link.setAttribute("download", "converted_image.png");
         } else {
-            link.setAttribute("download", "converted_images.zip");
+          link.setAttribute("download", "converted_images.zip");
         }
 
         link.href = url;
@@ -107,45 +108,46 @@ function App() {
           {error && <p>{error}</p>}
         </div>
       </div>
-      <div className='dicomFileDetails'>
-        <div className='convertedImageSection'>
+      {isConvertInProgress && <span>Converting...</span>}
+      {!isConvertInProgress &&
+        <div className='dicomFileDetails'>
+          <div className='convertedImageSection'>
 
-          {/* {pngImage && <img src={pngImage} alt="Converted PNG image" />} */}
-          {/* {pngImage && <ImageSlider folderLink={pngImage}/>} */}
-          {multiplePngImages && (<div>
-            <h2> Converted PNG Image </h2>
-            <ImageGallery 
-              items={multiplePngImages} 
-              showFullscreenButton={true}
-              showPlayButton={true}
-              showThumbnails={true}/>
-            <button onClick={() => handleDownload()}>Download</button></div>
-          )}
-          {singlePngImage && (
-          <div>
-            <h2> Converted PNG Image </h2>
-            <ImageGallery 
-            items={singlePngImage} 
-            showFullscreenButton={true}
-            showPlayButton={false}
-            showThumbnails={true}/>
-            <button onClick={() => handleDownload(0)}>Download</button>
-          </div>)}
-        </div>
-        <div className='dicomMetadataSection'>
-          {csvMetaData
-            && <CsvPreview metadata={csvMetaData}/>}
-          {csvMetaData && (
-          <a
-            href={`data:text/csv;charset=utf-8,${escape(csvMetaData)}`}
-            download="metadata.csv"
-          >
-            download
-          </a>
-        )}
-        </div>
-        
-      </div>
+            {/* {pngImage && <img src={pngImage} alt="Converted PNG image" />} */}
+            {/* {pngImage && <ImageSlider folderLink={pngImage}/>} */}
+            {multiplePngImages && (<div>
+              <h2> Converted PNG Image </h2>
+              <ImageGallery
+                items={multiplePngImages}
+                showFullscreenButton={true}
+                showPlayButton={true}
+                showThumbnails={true} />
+              <button onClick={() => handleDownload()}>Download</button></div>
+            )}
+            {singlePngImage && (
+              <div>
+                <h2> Converted PNG Image </h2>
+                <ImageGallery
+                  items={singlePngImage}
+                  showFullscreenButton={true}
+                  showPlayButton={false}
+                  showThumbnails={true} />
+                <button onClick={() => handleDownload(0)}>Download</button>
+              </div>)}
+          </div>
+          <div className='dicomMetadataSection'>
+            {csvMetaData
+              && <CsvPreview metadata={csvMetaData} />}
+            {csvMetaData && (
+              <a
+                href={`data:text/csv;charset=utf-8,${escape(csvMetaData)}`}
+                download="metadata.csv"
+              >
+                download
+              </a>
+            )}
+          </div>
+        </div>}
 
     </div>
   );
