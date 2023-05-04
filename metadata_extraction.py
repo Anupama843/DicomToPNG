@@ -11,9 +11,14 @@ def dicom_to_csv(dicom_file):
     print("dicom_file ====>>>> ")
     
     ds = dicom_file #get_dicom_Data(dicom_file)
+     
+    converted_file = './temp/converted_file.csv'
+    csv_data = dicom_data_to_csv_data(ds, converted_file)
+
+    if os.path.isfile(converted_file):
+        os.remove(converted_file)
     
-    # filename = os.path.splitext(dicom_file)[0] + '.csv'
-    return dicom_data_to_csv_data(ds, 'converted_file.csv')
+    return csv_data
 
 def dicom_data_to_csv_data(ds, filename):
     try:
