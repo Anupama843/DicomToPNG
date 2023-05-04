@@ -7,9 +7,8 @@ from flask import Flask, jsonify, send_file, request
 
 import numpy as np
 import zipfile
-import os
 
-def multiframe_dicom_converter(dicom_file, final_path, new_dir):
+def multiframe_dicom_converter(dicom_file):
     
     ds = dicom_file
     filename = dicom_file.filename
@@ -34,13 +33,6 @@ def multiframe_dicom_converter(dicom_file, final_path, new_dir):
             im_data = io.BytesIO()
             im.save(im_data, format='PNG')
             
-            # for dowloading the converted images
-            img_path = os.path.join(final_path, f"{new_dir}_{i}.png")
-            im.save(img_path)
-            print("in mutliimages image path :")
-            print(img_path)
-            converted_zipfile_images.append(img_path)
-
             im_data.seek(0)
             im_base64 = base64.b64encode(im_data.read()).decode('utf-8')
             convertedImages.append({
