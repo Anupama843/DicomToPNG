@@ -6,10 +6,8 @@ function CsvPreview({ metadata }) {
     const [array, setArray] = useState([]);
 
     useEffect(() => {
-        console.log("metadata ===>>>>>> ")
-        console.log(metadata)
         csvFileToArray(metadata)
-    });
+    }, []);
 
     const csvFileToArray = string => {
         const csvHeader = string.slice(0, string.indexOf("\n")).split(",");

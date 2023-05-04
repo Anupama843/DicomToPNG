@@ -43,7 +43,7 @@ def convert_dicom_to_png():
     print(ds)
 
     # create folder to save converted dicom images
-    parent_dir = './convertedimages'
+    parent_dir = './temp/convertedimages'
 
     isDirExists = os.path.exists(parent_dir)
     if(isDirExists):
@@ -55,7 +55,7 @@ def convert_dicom_to_png():
             print(error)
             print("Directory '% s' can not be removed" % parent_dir)
 
-    os.mkdir(parent_dir)
+    os.makedirs(parent_dir)
     
     #separate file name and ext
     new_dir = os.path.splitext(filename)[0]
@@ -79,11 +79,17 @@ def convert_dicom_to_png():
     
 
     #make a new directory to store all the images of one dicom file
-    os.mkdir(final_path)
+    os.makedirs(final_path)
 
 
     # metadata = dicom_to_csv(ds)
     metadata = metadata_extraction.dicom_to_csv(ds)
+
+    # try:
+    #     shutil.rmtree('./temp')
+    # except OSError as e:
+    #     print("Error: %s - %s." % (e.filename, e.strerror))
+
     if(metadata == ""):
         return jsonify({'success': False, 'error': 'Metadata conversion failed'})
     
@@ -121,7 +127,7 @@ def download_file():
     # Download the zip file containing all converted images
         print("muliple image idx:")
         print(image_idx)
-        return send_file('./converted_images.zip', as_attachment=True)
+        return send_file('./temp/converted_images.zip', as_attachment=True)
     else:
         # Download a single frame converted image
         # img_path = f'./temp/{image_idx}.png'

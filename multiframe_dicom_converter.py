@@ -51,7 +51,7 @@ def multiframe_dicom_converter(dicom_file, final_path, new_dir):
             })
 
         # Create a zip file of all converted PNG images
-        with zipfile.ZipFile('./converted_images.zip', 'w') as zip:
+        with zipfile.ZipFile('./temp/converted_images.zip', 'w') as zip:
             print("writing file to zip")
             for img in converted_zipfile_images:
                 print(img)
