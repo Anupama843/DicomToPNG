@@ -2,6 +2,7 @@ import csv
 from os import write
 import pydicom as dicom
 import os
+import shutil
 import base64
 
 def get_dicom_Data(dicom_file):
@@ -11,7 +12,22 @@ def dicom_to_csv(dicom_file):
     print("dicom_file ====>>>> ")
     
     ds = dicom_file #get_dicom_Data(dicom_file)
-     
+    
+    # To save header information (metadata) present in the dicom image
+    parent_dir = './temp'
+
+    isDirExists = os.path.exists(parent_dir)
+    if(isDirExists):
+        try:
+            print("Directory '% s' already exists!!" % parent_dir)
+            shutil.rmtree(parent_dir)
+            print("Directory '% s' has been removed successfully" % parent_dir)
+        except OSError as error:
+            print(error)
+            print("Directory '% s' can not be removed" % parent_dir)
+
+    os.makedirs(parent_dir)
+
     converted_file = './temp/converted_file.csv'
     csv_data = dicom_data_to_csv_data(ds, converted_file)
 
@@ -39,9 +55,3 @@ def dicom_data_to_csv_data(ds, filename):
         print("Metadata extraction exception occurred")
         print(e)
         return ""
-
-
-# listOfFiles = ['./file/test1.dcm', './file/test2.dcm', './file/test3.dcm', './file/test4.dcm', './file/test5.dcm', './file/0002.DCM']
-# for file in listOfFiles:
-# print("dicom_to_csv =====>>>> ")
-# print(dicom_to_csv('./0002.DCM'))

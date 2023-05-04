@@ -43,8 +43,8 @@ function App() {
     setIsConvertInProgress(false)
     if (data.success) {
       if (data.image) {
-        // setSinglePngImage(`data:image/png;base64,${data.image}`);
-        setSinglePngImage(data.image);
+        setSinglePngImage(`data:image/png;base64,${data.image}`);
+        // setSinglePngImage(data.image);
         setMultiplePngImages(null);
       } else if (data.images) {
         setSinglePngImage(null);
@@ -62,11 +62,17 @@ function App() {
     }
   };
 
+  const imageURL = 'data:image/png;base64' + singlePngImage;
+  const converted_png_image = [{
+    original: imageURL,
+    thumbnail: imageURL,
+  }]
+
   function saveAs(data, filename, type) {
     var link = document.createElement("a");
     link.setAttribute("href", type + data);
-    link.setAttribute("download", filename)
-
+    link.setAttribute("download", filename);
+    
     link.style.display = "none";
       document.body.appendChild(link);
 
@@ -80,57 +86,34 @@ function App() {
   const handleDownload = (image_index) => {
     // Create download link
     console.log("in png download function")
-    if (image_index == 0 && singlePngImage) {
-      saveAs(encodeURIComponent(singlePngImage), "image.png", 'data:image/png;charset=utf-8,');
-      return;
+    try {
+      if (image_index == 0 && singlePngImage) {
+        saveAs(singlePngImage, "image.png", '');
+        return;
+      }
+
+      var zip = new JSZip();
+      // see FileSaver.js
+
+      multiplePngImages.map((image, index) => {
+            zip.file(image.originalAlt + index + '.png', image.original.replace('data:image/png;base64,', ""), {base64: true})
+      })
+
+      zip.generateAsync({type:"base64"}).then(function(content) {
+        saveAs(content, "converted_images.zip", 'data:application/zip;base64,');
+      });
+    } catch (error){
+      console.log(error)
+      setError("Error downloading image(s). Please try again.");
     }
 
-    var zip = new JSZip();
-    multiplePngImages.map((image, index) => {
-      zip.file(image.originalAlt + index + '.png', image.original.replace('data:image/png;base64,', ""), {base64: true})
-    })
-    zip.generateAsync({type:"base64"}).then(function(content) {
-      // see FileSaver.js
-      saveAs(content, "images.zip", 'data:application/zip;base64,');
-    });
-
-    // let url = "/download";
-    // console.log("download button clicked")
-    // if (image_index !== undefined) {
-    //   console.log("single frame")
-    //   url += `?image_idx=${image_index}`;
-    // }
-    // fetch(url, {
-    //   method: "GET",
-    // })
-    //   .then((response) => {
-    //     console.log("in download react response");
-    //     console.log(response);
-    //     return response.blob();
-    //   })
-    //   .then((blob) => {
-    //     const url = window.URL.createObjectURL(blob);
-    //     console.log("url:");
-    //     console.log(url);
-    //     const link = document.createElement("a");
-
-    //     if (image_index !== undefined) {
-    //       link.setAttribute("download", "converted_image.png");
-    //     } else {
-    //       link.setAttribute("download", "converted_images.zip");
-    //     }
-
-    //     link.href = url;
-    //     // link.setAttribute("download", "converted_images.zip");
-    //     document.body.appendChild(link);
-    //     link.click();
-    //   });
+    
   };
 
   const downloadMetaData = () => {
     // Create download link
     console.log("in metadata download function")
-    saveAs(encodeURIComponent(csvMetaData), "metadata.png", 'data:text/csv;charset=utf-8,');
+    saveAs(encodeURIComponent(csvMetaData), "metadata.csv", 'data:text/csv;charset=utf-8,');
   }
 
 
@@ -163,9 +146,6 @@ function App() {
       {!isConvertInProgress &&
         <div className='dicomFileDetails'>
           <div className='convertedImageSection'>
-
-            {/* {pngImage && <img src={pngImage} alt="Converted PNG image" />} */}
-            {/* {pngImage && <ImageSlider folderLink={pngImage}/>} */}
             {multiplePngImages && (<div>
               <h2> Converted PNG Image </h2>
               <ImageGallery
@@ -182,7 +162,7 @@ function App() {
               <div>
                 <h2> Converted PNG Image </h2>
                 <ImageGallery
-                  items={singlePngImage}
+                  items={converted_png_image}
                   showFullscreenButton={true}
                   showPlayButton={false}
                   showThumbnails={true} />
