@@ -6,6 +6,7 @@ import CsvPreview from './CsvPreview'
 import JSZip from 'jszip'
 function App() {
   const [dicomFile, setDicomFile] = useState(null);
+  const [isConverionRequest, setIsConversionRequest] = useState(false);
   const [multiplePngImages, setMultiplePngImages] = useState(null);
   const [singlePngImage, setSinglePngImage] = useState(null);
   const [error, setError] = useState(null);
@@ -19,10 +20,12 @@ function App() {
     setMultiplePngImages(null)
     setSinglePngImage(null)
     setCsvMetaData(null)
+    setIsConversionRequest(false);
   };
 
   const handleConvert = async () => {
     console.log("in convert method");
+    setIsConversionRequest(true);
     const formData = new FormData();
     formData.append('file', dicomFile);
 
@@ -58,6 +61,7 @@ function App() {
       setMultiplePngImages(null);
       setSinglePngImage(null);
       setCsvMetaData(null);
+      setIsConversionRequest(false);
       setError(data.error);
     }
   };
@@ -142,8 +146,24 @@ function App() {
           <h4>{error}</h4>
         </div>
       }
+      {/* Home page before requesting convert action */}
+      {!isConverionRequest && 
+        <div className='aboutSection'>
+          <h3>Online Dicom to PNG Image Converter</h3>
+          <p>Welcome to our DICOM to PNG image converter website!</p>
+
+          <p>We understand that medical images are an important aspect of healthcare, but working with them can be a challenge. That's why we've created a simple and user-friendly tool to help you convert DICOM files to PNG images and view metadata information in the dicom image.</p>
+
+          <p>Our website allows you to easily upload your DICOM files and convert them to high-quality PNG images in just one click. You can also view patient's information, details on image and equipment used through metadata part of the dicom image.</p>
+
+          <p>With our DICOM to PNG image converter, you can quickly and easily convert medical images into a format that is more accessible and compatible with a wider range of devices and applications.</p>
+
+          <p>Thank you for choosing our DICOM to PNG image converter website. We hope that our tool will make your work with medical images easier and more efficient.</p>
+          
+        </div>}
+      {}
       {isConvertInProgress && <span>Converting...</span>}
-      {!isConvertInProgress &&
+      {!isConvertInProgress && isConverionRequest && 
         <div className='dicomFileDetails'>
           <div className='convertedImageSection'>
             {multiplePngImages && (<div>

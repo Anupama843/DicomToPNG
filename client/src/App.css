@@ -3,6 +3,7 @@
   flex-direction: column;
   border-style:groove;
   border-width: medium;
+  height: 100%;
 }
 
 .appHeader {
@@ -28,10 +29,17 @@
   color: rgb(30, 40, 51);
 }
 
+.aboutSection{
+  text-align: center;
+  margin-left: 25%;;
+  margin-right: 25%;
+  min-height:100vh
+}
 .dicomFileDetails {
   display: flex;
   flex-direction: row;
   border-style:groove;  
+  min-height:100vh
 }
 
 .convertedImageSection{
