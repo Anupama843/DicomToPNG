@@ -162,7 +162,7 @@ function App() {
           
         </div>}
       {}
-      {isConvertInProgress && <span>Converting...</span>}
+      {isConvertInProgress && <span class="loader"><span class="loader-inner"></span></span>}
       {!isConvertInProgress && isConversionRequest && 
         <div className='dicomFileDetails'>
             {multiplePngImages && (<div className='convertedImageSection'>
