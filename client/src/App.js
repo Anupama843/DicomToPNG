@@ -6,7 +6,7 @@ import CsvPreview from './CsvPreview'
 import JSZip from 'jszip'
 function App() {
   const [dicomFile, setDicomFile] = useState(null);
-  const [isConverionRequest, setIsConversionRequest] = useState(false);
+  const [isConversionRequest, setIsConversionRequest] = useState(false);
   const [multiplePngImages, setMultiplePngImages] = useState(null);
   const [singlePngImage, setSinglePngImage] = useState(null);
   const [error, setError] = useState(null);
@@ -147,7 +147,7 @@ function App() {
         </div>
       }
       {/* Home page before requesting convert action */}
-      {!isConverionRequest && 
+      {!isConversionRequest && 
         <div className='aboutSection'>
           <h3>Online Dicom to PNG Image Converter</h3>
           <p>Welcome to our DICOM to PNG image converter website!</p>
@@ -163,34 +163,35 @@ function App() {
         </div>}
       {}
       {isConvertInProgress && <span>Converting...</span>}
-      {!isConvertInProgress && isConverionRequest && 
+      {!isConvertInProgress && isConversionRequest && 
         <div className='dicomFileDetails'>
-          <div className='convertedImageSection'>
-            {multiplePngImages && (<div>
+            {multiplePngImages && (<div className='convertedImageSection'>
               <h2> Converted PNG Image </h2>
+              
               <ImageGallery
                 items={multiplePngImages}
                 showFullscreenButton={true}
                 showPlayButton={true}
                 showThumbnails={true} />
-              <div className='downloadButtonsSection'>
-                <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
-              </div>
+              
+              
+              <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+              
             </div>
             )}
             {singlePngImage && (
-              <div>
+              <div className='convertedImageSection'>
                 <h2> Converted PNG Image </h2>
                 <ImageGallery
                   items={converted_png_image}
                   showFullscreenButton={true}
                   showPlayButton={false}
                   showThumbnails={true} />
-                <div className='downloadButtonsSection'>
+                
                   <button id="downloadSingleImageButton" onClick={() => handleDownload(0)}>Download</button>
-                </div>
+                
               </div>)}
-          </div>
+          
           <div className='dicomMetadataSection'>
             {csvMetaData
               && <CsvPreview metadata={csvMetaData} />}
