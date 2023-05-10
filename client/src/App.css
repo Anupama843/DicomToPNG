@@ -44,16 +44,16 @@
 
 .convertedImageSection{
   flex: 1;
-  position: relative;
+  display: flex;
+  flex-direction: column;
   width: 50%;
-  height: 50%;
+  height: 100%;
   background-color: white;
+  justify-content: space-around;
+  max-height: 800px;
+  position: relative;
 }
 
-#downloadMultiImagesButton, #downloadSingleImageButton{
-  position: absolute;
-  bottom: 0px;
-}
 .convertedImageSection h2{
   text-align: center;
   color: rgb(30, 40, 51)
@@ -80,13 +80,19 @@
   text-align: center;
   color: red;
 }
-
+/* 
 .downloadButtonsSection{
-  display: inline-block;
-  margin-top: 10px;
-}
+  position:ab;
+  bottom:0;  
+} */
+
+
 
 #downloadMetaDataButton, #downloadSingleImageButton, #downloadMultiImagesButton  {
   background-color: rgb(30, 40, 51);
   color: white;
+  bottom: 0px;
+  margin-top: 20px;
+  width: 15%;
+  align-content: flex-end;
 }
