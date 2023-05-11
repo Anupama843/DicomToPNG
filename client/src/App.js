@@ -194,12 +194,12 @@ function App() {
           
           <div className='dicomMetadataSection'>
             {csvMetaData
-              && <CsvPreview metadata={csvMetaData} />}
-            {csvMetaData && (
-              <div className='downloadButtonsSection'>
-                <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
-              </div>
-            )}
+              && <div className='csvMetadataSection'>
+                  <CsvPreview metadata={csvMetaData} />
+                  <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                </div>
+            }
+            
           </div>
         </div>}
 
