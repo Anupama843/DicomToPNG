@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './csvPreview.css';
+import '../stylesheets/csvPreview.css';
 
 function CsvPreview({ metadata }) {
 

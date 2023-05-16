@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './App.css';
+import * as FileSaver from 'file-saver';
+import './stylesheets/App.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import ImageGallery from 'react-image-gallery';
-import CsvPreview from './CsvPreview'
-import JSZip from 'jszip'
+import CsvPreview from './components/CsvPreview';
+import JSZip from 'jszip';
+
 
 function App() {
   const [dicomFile, setDicomFile] = useState(null);
@@ -13,6 +15,7 @@ function App() {
   const [error, setError] = useState(null);
   const [csvMetaData, setCsvMetaData] = useState(null);
   const [isConvertInProgress, setIsConvertInProgress] = useState(false);
+
 
   const handleFileChange = (e) => {
     setDicomFile(e.target.files[0]);
@@ -39,13 +42,25 @@ function App() {
     setIsConversionRequest(true);
     const formData = new FormData();
     formData.append('file', dicomFile);
-    console.log(dicomFile)
-    console.log(dicomFile.name)
+
     setIsConvertInProgress(true)
     setError(null)
     setMultiplePngImages(null)
     setSinglePngImage(null)
     setCsvMetaData(null)
+
+    // alert window asking user whether to allow the system to save the dicom file 
+    const shouldSave = window.confirm('Do you want to save the file locally?');
+    if (shouldSave) {
+      console.log("Fetching save file")
+      fetch('/saveFile', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(response => response.text())
+        .then(text => console.log(text))
+        .catch(error => console.error(error));
+    }
 
     const response = await fetch('/convert', {
       method: 'POST',
@@ -65,6 +80,7 @@ function App() {
         setSinglePngImage(null);
         setMultiplePngImages(data.images);
       }
+      
       setCsvMetaData(atob(data.metadata))
       setError(null);
     } else {
@@ -150,7 +166,7 @@ function App() {
         <h1>DICOM to PNG Converter</h1>
         <div className='imageUploadSection'>
           <input type="file" onChange={handleFileChange} />
-          <button id="convertButton" onClick={handleConvert}>Convert </button>
+          <button id="convertButton" onClick={handleConvert}>Convert</button>
           {/* {error && <p>{error}</p>} */}
         </div>
       </div>

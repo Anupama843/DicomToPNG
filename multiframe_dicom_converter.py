@@ -38,6 +38,9 @@ def multiframe_dicom_converter(dicom_file):
             convertedImages.append({
                 'original': f'data:image/png;base64,{im_base64}',
                 'thumbnail': f'data:image/png;base64,{im_base64}',
+                'originalTitle' : f'image_{i}',
+                'thumbnailTitle' : f'image_{i}',
+                'thumbnailLabel' : f'image_{i}',
                 'originalAlt': filename,
                 'thumbnailAlt': filename
             })

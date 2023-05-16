@@ -68,7 +68,25 @@ def convert_dicom_to_png():
     else:
         return jsonify({'success': False, 'error': 'Invalid DICOM image'})
     
- 
+
+@app.route('/saveFile', methods=['POST'])
+def save_dicom_file():
+    print("in save file method")
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded. Please upload Dicom Image file'})
+
+    uploaded_file = request.files['file']
+    if uploaded_file.filename == '':
+        return jsonify({'success': False, 'error': 'Uploaded file is empty'})
+
+
+    # Save the file to a local directory
+    save_path = os.path.join(os.getcwd(), uploaded_file.filename)
+    uploaded_file.save(save_path)
+
+    return "File saved successfully."
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
