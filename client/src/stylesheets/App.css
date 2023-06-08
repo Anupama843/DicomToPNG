@@ -11,7 +11,7 @@
   flex:20%;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   padding: 10px; 
   border-style:groove;
   border-width: medium;
@@ -21,14 +21,37 @@
   color: white;
 }
 
-.imageUploadSection {
+.dicomFileHandlingSection {
   margin-top: 2rem;
   color: white;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.dicomFileOrFolderUploadSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileOrFolderSection {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.fileOrFolderUploadOptionSection {
+  margin-bottom: 1rem;
+}
+
+.folderDropDownSection {
+  margin-left: 1rem;
 }
 
 #convertButton{
   color: rgb(30, 40, 51);
 }
+
 
 .aboutSection{
   text-align: center;
