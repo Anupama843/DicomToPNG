@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import * as FileSaver from 'file-saver';
 import './stylesheets/App.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import ImageGallery from 'react-image-gallery';
 import CsvPreview from './components/CsvPreview';
-import JSZip from 'jszip';
+import ImageGalleryModal from './components/ImageGalleryModal';
+import JSZip, { files } from 'jszip';
 
 
 function App() {
   const [dicomFile, setDicomFile] = useState(null);
+  const [dicomFolder, setDicomFolder] = useState(null);
   const [isConversionRequest, setIsConversionRequest] = useState(false);
   const [multiplePngImages, setMultiplePngImages] = useState(null);
   const [singlePngImage, setSinglePngImage] = useState(null);
   const [error, setError] = useState(null);
   const [csvMetaData, setCsvMetaData] = useState(null);
   const [isConvertInProgress, setIsConvertInProgress] = useState(false);
-
-
-  const handleFileChange = (e) => {
-    setDicomFile(e.target.files[0]);
-    setError(null)
-    setMultiplePngImages(null)
-    setSinglePngImage(null)
-    setCsvMetaData(null)
-    setIsConversionRequest(false);
-  };
+  const [isFolderUpload, setIsFolderUpload] = useState(false);
+  const [subfolders, setSubfolders] = useState([]);
+  const [selectedSubfolder, setSelectedSubfolder] = useState('');
+  const [selectedSubfolderImages, setSelectedSubfolderImages] = useState(null);
+  const [selectedSubfolderDicomFrame, setSelectedSubfolderDicomFrame] = useState('');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -37,17 +32,87 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  const initialize = () => {
+    setSinglePngImage(null);
+    setMultiplePngImages(null);
+    setCsvMetaData(null);
+    setSubfolders('');
+    setSelectedSubfolder('');
+    setSelectedSubfolderImages(null);
+    setSelectedSubfolderDicomFrame('');    
+  };
+
+  const subFolderData = (subfolders, selected_subfolder) =>{
+    console.log("in sub folder data function");
+    const selectedData = subfolders.find((subfolder) => subfolder.subfolder === selected_subfolder);
+
+    console.log("selected subfolder data:")
+    console.log(selectedData)
+    
+
+    // Extract the images and metadata for the selected subfolder
+    const images = selectedData ? selectedData.converted_files.map((file) => file.images) : [];
+    const metadataArray= selectedData ? selectedData.converted_files.map((file) => file.metadata) : null;
+    const dicomFrame = selectedData ? selectedData.converted_files.map((file) => file.dicomframe) : '';
+    
+    setSelectedSubfolderImages(images);
+
+    const metadata = metadataArray.length > 0 ? metadataArray[0] : null;
+
+    setCsvMetaData(atob(metadata));
+    setSelectedSubfolderDicomFrame(dicomFrame);
+
+  };
+
+  const handleFileChange = (e) => {
+    
+    if(!isFolderUpload){
+      setDicomFile(e.target.files[0]);
+    }else{
+      // setDicomFolder(Array.from(e.target.files));
+      console.log("folder")
+      console.log(e.target.files)
+      setDicomFolder(e.target.files);
+    }
+    
+    setError(null)
+    setIsConversionRequest(false);
+    initialize();
+  };
+
+  const handleUploadOptionChange = (e) => {
+    setIsFolderUpload(e.target.value === 'folder');
+    initialize();
+  };
+
+  const handleSubfolderChange = (event) => {
+    console.log("in selected subfolder handle")
+    const selectedSubfolderName = event.target.value;
+    setSelectedSubfolder(event.target.value);    
+
+    if(subfolders.length > 0){
+      subFolderData(subfolders, selectedSubfolderName )
+    }
+    
+  };
+
   const handleConvert = async () => {
     console.log("in convert method");
     setIsConversionRequest(true);
     const formData = new FormData();
-    formData.append('file', dicomFile);
+    if(!isFolderUpload){
+      formData.append('file', dicomFile);
+    }else{
+      console.log("folder data");
+      console.log(dicomFolder);
+      for (const file of dicomFolder) {
+        formData.append('files', file, file.name)
+      }
+    }
 
-    setIsConvertInProgress(true)
-    setError(null)
-    setMultiplePngImages(null)
-    setSinglePngImage(null)
-    setCsvMetaData(null)
+    setIsConvertInProgress(true);
+    setError(null);
+    initialize();
 
     // alert window asking user whether to allow the system to save the dicom file 
     const shouldSave = window.confirm('Do you want to save the file locally?');
@@ -62,23 +127,48 @@ function App() {
         .catch(error => console.error(error));
     }
 
+    console.log("printing form data before calling convert");
+    console.log(formData)
+
     const response = await fetch('/convert', {
       method: 'POST',
       body: formData
     });
-
+    console.log("fetch called");
     const data = await response.json();
     console.log("data:");
     console.log(data);
     setIsConvertInProgress(false)
+    
     if (data.success) {
-      if (data.image) {
+      let folder_data = null;
+      let subfolder_data = null;
+      console.log("data success");
+      if(isFolderUpload){
+        console.log("folder upload result");
+        folder_data = data.folder;
+        console.log("folder data :");
+        console.log(folder_data);
+        setSubfolders(folder_data);
+        subfolder_data = folder_data && folder_data.length > 0 ? folder_data[0].subfolder : null; 
+        setSelectedSubfolder(subfolder_data );
+        
+        console.log("calling subfolder data function");
+
+        if(folder_data && subfolder_data){
+          subFolderData(folder_data,subfolder_data);
+        }
+        
+      }
+      if (!isFolderUpload && data.image) {
         setSinglePngImage(`data:image/png;base64,${data.image}`);
         // setSinglePngImage(data.image);
         setMultiplePngImages(null);
-      } else if (data.images) {
+        setSubfolders('');
+      } else if (!isFolderUpload && data.images) {
         setSinglePngImage(null);
         setMultiplePngImages(data.images);
+        setSubfolders('');
       }
       
       setCsvMetaData(atob(data.metadata))
@@ -86,11 +176,9 @@ function App() {
     } else {
       console.log("Encountered error")
       console.log(data.error);
-      setMultiplePngImages(null);
-      setSinglePngImage(null);
-      setCsvMetaData(null);
       setIsConversionRequest(false);
       setError(data.error);
+      initialize();
     }
   };
 
@@ -99,6 +187,8 @@ function App() {
     original: imageURL,
     thumbnail: imageURL,
   }]
+
+  
 
   function saveAs(data, filename) {
     var link = document.createElement("a");
@@ -164,10 +254,40 @@ function App() {
     <div className='dicomImageConverterApp'>
       <div className='appHeader'>
         <h1>DICOM to PNG Converter</h1>
-        <div className='imageUploadSection'>
-          <input type="file" onChange={handleFileChange} />
-          <button id="convertButton" onClick={handleConvert}>Convert</button>
-          {/* {error && <p>{error}</p>} */}
+        <div className='dicomFileHandlingSection'>
+          <div className='dicomFileOrFolderUploadSection'>
+            <div className='fileOrFolderUploadOptionSection'>
+              <label>
+                <input type="radio" name="uploadOption" value="single" checked={!isFolderUpload} onChange={handleUploadOptionChange}/>
+                  Single File
+              </label>
+              <label>
+                <input type="radio" name="uploadOption" value="folder" checked={isFolderUpload} onChange={handleUploadOptionChange}/>
+                  Folder
+              </label>
+            </div>
+            <div className='fileOrFolderSection'>
+              <div className='uploadFileOrFolderSection'>
+                {!isFolderUpload && <input type="file" onChange={handleFileChange} />}
+                {isFolderUpload && <input type="file" webkitdirectory = "" onChange={handleFileChange} />}
+                <button id="convertButton" onClick={handleConvert}>Convert</button>
+              </div>
+              <div className='folderDropDownSection'>
+                {isFolderUpload && subfolders && <div className='subFolderSection'>
+                  <select value={selectedSubfolder} onChange={handleSubfolderChange}>
+              
+                  {subfolders && subfolders.map((subfolder) => (
+                    <option key={subfolder.subfolder} value={subfolder.subfolder}>
+                      {subfolder.subfolder}
+                    </option>
+                  ))}
+                  </select>
+                </div>}
+              </div>
+            </div>
+            
+          </div>
+        
         </div>
       </div>
       {error &&
@@ -194,34 +314,75 @@ function App() {
       {isConvertInProgress && <span class="loader"><span class="loader-inner"></span></span>}
       {!isConvertInProgress && isConversionRequest && 
         <div className='dicomFileDetails'>
-            {multiplePngImages && (<div className='convertedImageSection'>
+          {isFolderUpload && selectedSubfolder && <>
+            {selectedSubfolderDicomFrame == 'single' && selectedSubfolderImages.map((image,index) => (
+              <>
+                <div className='convertedImageSection'>
+                  <h2> Converted PNG Image </h2>
+                  <ImageGalleryModal images = {image}/>
+                  <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+                </div>
+                <div className='dicomMetadataSection'>
+                  {csvMetaData && <div className='csvMetadataSection'>
+                    <CsvPreview metadata={csvMetaData} />
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                    </div>
+                  }
+                </div>
+              </>
+            ))}
+            {selectedSubfolderDicomFrame == 'multi' && selectedSubfolderImages.map((images,index) => (
+              <>
+                {images.map((singleImage,subIndex) => (
+                  <div className='convertedImageSection'>
+                    <h2> Converted PNG Image </h2>
+                    <ImageGalleryModal images = {singleImage}/>
+                    <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+                  </div>
+                ))}
+                {csvMetaData && <div className='csvMetadataSection'>
+                    <CsvPreview metadata={csvMetaData} />
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                  </div>
+                }
+              </>
+            ))}
+            </>}
+            {multiplePngImages && (
+            <>
+            <div className='convertedImageSection'>
+              
               <h2> Converted PNG Image </h2>
-              
-              <ImageGallery
-                items={multiplePngImages}
-                showFullscreenButton={true}
-                showPlayButton={true}
-                showThumbnails={true} />
-              
-              
+              <ImageGalleryModal images = {multiplePngImages}/>
               <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
-              
             </div>
+            <div className='dicomMetadataSection'>
+              {csvMetaData && <div className='csvMetadataSection'>
+                    <CsvPreview metadata={csvMetaData} />
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                  </div>
+              }
+            </div>
+            </>
             )}
             {singlePngImage && (
+              <>
               <div className='convertedImageSection'>
                 <h2> Converted PNG Image </h2>
-                <ImageGallery
-                  items={converted_png_image}
-                  showFullscreenButton={true}
-                  showPlayButton={false}
-                  showThumbnails={true} />
-                
-                  <button id="downloadSingleImageButton" onClick={() => handleDownload(0)}>Download</button>
-                
-              </div>)}
+                <ImageGalleryModal images = {converted_png_image}/>
+                <button id="downloadSingleImageButton" onClick={() => handleDownload(0)}>Download</button>
+              </div>
+              <div className='dicomMetadataSection'>
+                {csvMetaData && <div className='csvMetadataSection'>
+                    <CsvPreview metadata={csvMetaData} />
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                  </div>
+                } 
+              </div>
+              </>
+              )}
           
-          <div className='dicomMetadataSection'>
+          {/* <div className='dicomMetadataSection'>
             {csvMetaData
               && <div className='csvMetadataSection'>
                   <CsvPreview metadata={csvMetaData} />
@@ -229,7 +390,7 @@ function App() {
                 </div>
             }
             
-          </div>
+          </div> */}
         </div>}
     </div>
   );
