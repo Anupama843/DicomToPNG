@@ -16,6 +16,7 @@
   border-style:groove;
   border-width: medium;
   background-color:rgb(30, 40, 51);
+  align-items:end;
 }
 .appHeader h1{
   color: white;
@@ -53,7 +54,7 @@
 }
 
 
-.aboutSection{
+.aboutSection, #contactInformation {
   text-align: center;
   margin-left: 25%;;
   margin-right: 25%;

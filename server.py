@@ -48,8 +48,12 @@ def convert_dicom_to_png():
             print("accessing each file")
             print(file.__dict__)
             filename = file.filename
+            print("filename :")
             print(filename)
-            subfolder = filename.replace('.dcm', '')
+            _, ext = os.path.splitext(filename)
+            print("extension")
+            print(ext)
+            subfolder = filename.replace(ext, '')
             subfolder_path = os.path.join('converted', subfolder)
             os.makedirs(subfolder_path, exist_ok=True)
             
@@ -76,6 +80,9 @@ def convert_dicom_to_png():
                 print("converted images")
                 # print(converted_images)
                 converted_files.append({'images' : converted_images, 'metadata' : metadata, 'dicomframe' : dicom_frame})                     
+
+            else :
+                converted_files.append({'images' : '', 'metadata' : '', 'dicomframe' : '', 'error': 'This file is not a dicom file with extension ".dcm/.DCM"'})
               
               # Append the converted file path to the subfolder list
             subfolder_files = {'subfolder': subfolder, 'converted_files': converted_files}
@@ -96,10 +103,6 @@ def convert_folder_dicom_file_to_png(dicom_file):
     print("filename : " + filename)
     ds = dicom_file
     print("ds ========>>>> in single file converter ")
-        # try:
-    #     shutil.rmtree('./temp')
-    # except OSError as e:
-    #     print("Error: %s - %s." % (e.filename, e.strerror))
     
     converted_images = []
 

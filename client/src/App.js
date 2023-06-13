@@ -4,6 +4,8 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import CsvPreview from './components/CsvPreview';
 import ImageGalleryModal from './components/ImageGalleryModal';
 import JSZip, { files } from 'jszip';
+import AboutPage from './components/AboutPage';
+import ContactPage from './components/ContactPage';
 
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
   const [selectedSubfolder, setSelectedSubfolder] = useState('');
   const [selectedSubfolderImages, setSelectedSubfolderImages] = useState(null);
   const [selectedSubfolderDicomFrame, setSelectedSubfolderDicomFrame] = useState('');
+  const [dicomFilename, setDicomFilename] = useState('');
+  const [showContactInformation, setShowContactInformation] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,7 +43,8 @@ function App() {
     setSubfolders('');
     setSelectedSubfolder('');
     setSelectedSubfolderImages(null);
-    setSelectedSubfolderDicomFrame('');    
+    setSelectedSubfolderDicomFrame('');  
+    setShowContactInformation(false);  
   };
 
   const subFolderData = (subfolders, selected_subfolder) =>{
@@ -54,7 +59,21 @@ function App() {
     const images = selectedData ? selectedData.converted_files.map((file) => file.images) : [];
     const metadataArray= selectedData ? selectedData.converted_files.map((file) => file.metadata) : null;
     const dicomFrame = selectedData ? selectedData.converted_files.map((file) => file.dicomframe) : '';
+    const dicomFileError = selectedData ? selectedData.converted_files.map((file) => file.error) : '';
+
+    const singleDicomFileError = dicomFileError[0];
+
+    //if any error while converting individual dicom file to png
+    if(singleDicomFileError){
+      setError(dicomFileError);
+    }else{
+      setError(null);
+    }
+
+    const filename = selectedData ? selectedData.subfolder : '';
     
+    setDicomFilename(filename);
+
     setSelectedSubfolderImages(images);
 
     const metadata = metadataArray.length > 0 ? metadataArray[0] : null;
@@ -68,6 +87,7 @@ function App() {
     
     if(!isFolderUpload){
       setDicomFile(e.target.files[0]);
+      setDicomFilename(e.target.files[0].name);
     }else{
       // setDicomFolder(Array.from(e.target.files));
       console.log("folder")
@@ -214,26 +234,47 @@ function App() {
     return result
   }
 
-  const handleDownload = (image_index) => {
+  const handleDownload = (image_index, downloadImage) => {
     // Create download link
     console.log("in png download function")
+    console.log(image_index)
     try {
-      if (image_index === 0 && singlePngImage) {
+      if (image_index === 0 ){
+        if(singlePngImage) {
         let fileName = convertFileExtension(dicomFile.name, ".png")
         saveAs(singlePngImage, fileName);
         return;
       }
+    }
 
       var zip = new JSZip();
+      let fileName = '';
+      let images = [];
+      if(isFolderUpload){
+        console.log("in folder upload : download");
+        fileName = dicomFilename;
+        console.log(fileName);
+        images = downloadImage;
+        
+      }else{
+        console.log("single filr")
+        fileName = convertFileExtension(dicomFile.name, "")
+        images = multiplePngImages;
+      }
+      console.log("images");
+      console.log(images);
       // see FileSaver.js
-      let fileName = convertFileExtension(dicomFile.name, "")
-      multiplePngImages.map((image, index) => {
+      
+      images.map((image, index) => {
+        console.log("in map loop")
+        console.log(image);
             zip.file(fileName + "_" + index + '.png', image.original.replace('data:image/png;base64,', ""), {base64: true})
       })
 
-      zip.generateAsync({type:"base64"}).then(function(content) {
-        let fileName = convertFileExtension(dicomFile.name, ".zip")
-        saveAs('data:application/zip;base64,' + content, fileName);
+      zip.generateAsync({type:"base64"}).then(function(content){
+        // let filename = convertFileExtension(fileName, ".zip");
+        let filename = fileName + '.zip';
+        saveAs('data:application/zip;base64,' + content, filename);
       });
     } catch (error){
       console.log(error)
@@ -243,12 +284,21 @@ function App() {
     
   };
 
-  const downloadMetaData = () => {
+  const downloadMetaData = (filename) => {
     // Create download link
     console.log("in metadata download function")
-    let fileName = convertFileExtension(dicomFile.name, ".csv")
+      
+    let fileName = convertFileExtension(filename, ".csv")
     saveAs('data:text/csv;charset=utf-8,' + encodeURIComponent(csvMetaData), fileName);
   }
+
+  const handleContactInformation = () => {
+    console.log(" in handle contact information");
+    initialize();
+    setShowContactInformation(true);
+    setIsConversionRequest(false);
+    setIsConvertInProgress(false);
+  };
 
   return (
     <div className='dicomImageConverterApp'>
@@ -289,6 +339,9 @@ function App() {
           </div>
         
         </div>
+        <div>
+          <a href="#contactInformation" onClick={handleContactInformation}>Contact</a>
+        </div>
       </div>
       {error &&
         <div className='errorMessageSection'>
@@ -296,23 +349,13 @@ function App() {
         </div>
       }
       {/* Home page before requesting convert action */}
-      {!isConversionRequest && 
+      {!isConversionRequest && !showContactInformation &&
         <div className='aboutSection'>
-          <h3>Online Dicom to PNG Image Converter</h3>
-          <p>Welcome to our DICOM to PNG image converter website!</p>
-
-          <p>We understand that medical images are an important aspect of healthcare, but working with them can be a challenge. That's why we've created a simple and user-friendly tool to help you convert DICOM files to PNG images and view metadata information in the dicom image.</p>
-
-          <p>Our website allows you to easily upload your DICOM files and convert them to high-quality PNG images in just one click. You can also view patient's information, details on image and equipment used through metadata part of the dicom image.</p>
-
-          <p>With our DICOM to PNG image converter, you can quickly and easily convert medical images into a format that is more accessible and compatible with a wider range of devices and applications.</p>
-
-          <p>Thank you for choosing our DICOM to PNG image converter website. We hope that our tool will make your work with medical images easier and more efficient.</p>
-          
-        </div>}
-      {}
+          <AboutPage/>
+        </div>
+      }
       {isConvertInProgress && <span class="loader"><span class="loader-inner"></span></span>}
-      {!isConvertInProgress && isConversionRequest && 
+      {!isConvertInProgress && isConversionRequest && !error &&
         <div className='dicomFileDetails'>
           {isFolderUpload && selectedSubfolder && <>
             {selectedSubfolderDicomFrame == 'single' && selectedSubfolderImages.map((image,index) => (
@@ -320,12 +363,12 @@ function App() {
                 <div className='convertedImageSection'>
                   <h2> Converted PNG Image </h2>
                   <ImageGalleryModal images = {image}/>
-                  <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+                  <button id="downloadMultiImagesButton" onClick={() => handleDownload(0, image)}>Download</button>
                 </div>
                 <div className='dicomMetadataSection'>
                   {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                     </div>
                   }
                 </div>
@@ -337,14 +380,15 @@ function App() {
                   <div className='convertedImageSection'>
                     <h2> Converted PNG Image </h2>
                     <ImageGalleryModal images = {singleImage}/>
-                    <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+                    <button id="downloadMultiImagesButton" onClick={() => handleDownload(0, singleImage)}>Download</button>
                   </div>
                 ))}
                 {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
                 }
+
               </>
             ))}
             </>}
@@ -359,7 +403,7 @@ function App() {
             <div className='dicomMetadataSection'>
               {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
               }
             </div>
@@ -375,23 +419,17 @@ function App() {
               <div className='dicomMetadataSection'>
                 {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
+                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
                 } 
               </div>
               </>
               )}
-          
-          {/* <div className='dicomMetadataSection'>
-            {csvMetaData
-              && <div className='csvMetadataSection'>
-                  <CsvPreview metadata={csvMetaData} />
-                  <button id="downloadMetaDataButton" onClick={() => downloadMetaData()}>Download</button>
-                </div>
-            }
-            
-          </div> */}
         </div>}
+        {showContactInformation && <div id="contactInformation">
+          <ContactPage/>
+        </div>
+        }
     </div>
   );
 }
