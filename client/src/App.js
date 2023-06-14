@@ -6,6 +6,7 @@ import ImageGalleryModal from './components/ImageGalleryModal';
 import JSZip, { files } from 'jszip';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
+import Logo from './Logo/logo.png'
 
 
 function App() {
@@ -303,7 +304,14 @@ function App() {
   return (
     <div className='dicomImageConverterApp'>
       <div className='appHeader'>
-        <h1>DICOM to PNG Converter</h1>
+        <div className='logoHeader'>
+          <div className='logo'>
+            <img src={Logo} alt="Logo" />
+          </div>
+          <h1>
+            PixelBrew
+          </h1>
+        </div>
         <div className='dicomFileHandlingSection'>
           <div className='dicomFileOrFolderUploadSection'>
             <div className='fileOrFolderUploadOptionSection'>
