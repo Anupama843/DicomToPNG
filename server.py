@@ -171,17 +171,34 @@ def convert_single_dicom_file_to_png(dicom_file):
 @app.route('/saveFile', methods=['POST'])
 def save_dicom_file():
     print("in save file method")
-    if 'file' not in request.files:
-        return jsonify({'success': False, 'error': 'No file uploaded. Please upload Dicom Image file'})
+    if 'file' not in request.files and 'files' not in request.files:
+        return jsonify({'success': False, 'error': 'No file/folder uploaded. Please upload Dicom Image file'})
+    
+    
+    # Create a directory in a known location to save files to.
+    uploads_dir = './uploads'
 
-    uploaded_file = request.files['file']
-    if uploaded_file.filename == '':
-        return jsonify({'success': False, 'error': 'Uploaded file is empty'})
+    os.makedirs(uploads_dir, exist_ok=True)
 
+    if 'file' in request.files :
+        uploaded_file = request.files['file']
+        if uploaded_file.filename == '':
+            return jsonify({'success': False, 'error': 'Uploaded file is empty'})
+        save_path = os.path.join(uploads_dir, uploaded_file.filename)
+        uploaded_file.save(save_path)
+    elif 'files' in request.files :
+        uploaded_folder = request.files.getlist('files')
+        print("folder save")
+        print(uploaded_folder)
 
-    # Save the file to a local directory
-    save_path = os.path.join(os.getcwd(), uploaded_file.filename)
-    uploaded_file.save(save_path)
+        #save each file in the folder
+        for file in uploaded_folder:
+            print("file in save route:")
+            print(file)
+            print("filename:")
+            print(file.filename)
+            file.save(os.path.join(uploads_dir, secure_filename(file.filename)))
+
 
     return "File saved successfully."
 

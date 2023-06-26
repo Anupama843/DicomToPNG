@@ -6,7 +6,7 @@ import ImageGalleryModal from './components/ImageGalleryModal';
 import JSZip, { files } from 'jszip';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
-import Logo from './Logo/logo.png'
+import Logo from './Logo/logo_1.png';
 
 
 function App() {
@@ -86,7 +86,7 @@ function App() {
 
   const handleFileChange = (e) => {
     
-    if(!isFolderUpload){
+    if(!isFolderUpload && e.target.files){
       setDicomFile(e.target.files[0]);
       setDicomFilename(e.target.files[0].name);
     }else{
@@ -326,8 +326,8 @@ function App() {
             </div>
             <div className='fileOrFolderSection'>
               <div className='uploadFileOrFolderSection'>
-                {!isFolderUpload && <input type="file" onChange={handleFileChange} />}
-                {isFolderUpload && <input type="file" webkitdirectory = "" onChange={handleFileChange} />}
+                {!isFolderUpload && <input id= "fileUpload" type="file" onChange={handleFileChange} />}
+                {isFolderUpload && <input id="folderUpload" type="file" webkitdirectory = "" onChange={handleFileChange} />}
                 <button id="convertButton" onClick={handleConvert}>Convert</button>
               </div>
               <div className='folderDropDownSection'>
@@ -371,12 +371,14 @@ function App() {
                 <div className='convertedImageSection'>
                   <h2> Converted PNG Image </h2>
                   <ImageGalleryModal images = {image}/>
-                  <button id="downloadMultiImagesButton" onClick={() => handleDownload(0, image)}>Download</button>
+                  <div className='button-container'>
+                    <button id="downloadButton" onClick={() => handleDownload(0, image)}>Download</button>
+                  </div>
                 </div>
                 <div className='dicomMetadataSection'>
                   {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
+                    <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                     </div>
                   }
                 </div>
@@ -388,12 +390,12 @@ function App() {
                   <div className='convertedImageSection'>
                     <h2> Converted PNG Image </h2>
                     <ImageGalleryModal images = {singleImage}/>
-                    <button id="downloadMultiImagesButton" onClick={() => handleDownload(0, singleImage)}>Download</button>
+                    <button id="downloadButton" onClick={() => handleDownload(0, singleImage)}>Download</button>
                   </div>
                 ))}
                 {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
+                    <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
                 }
 
@@ -405,13 +407,15 @@ function App() {
             <div className='convertedImageSection'>
               
               <h2> Converted PNG Image </h2>
-              <ImageGalleryModal images = {multiplePngImages}/>
-              <button id="downloadMultiImagesButton" onClick={() => handleDownload()}>Download</button>
+              <div className='convertedImageSection_images'>
+                <ImageGalleryModal images = {multiplePngImages}/>
+              </div>
+              <button id="downloadButton" onClick={() => handleDownload()}>Download</button>
             </div>
             <div className='dicomMetadataSection'>
               {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
+                    <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
               }
             </div>
@@ -421,13 +425,15 @@ function App() {
               <>
               <div className='convertedImageSection'>
                 <h2> Converted PNG Image </h2>
-                <ImageGalleryModal images = {converted_png_image}/>
-                <button id="downloadSingleImageButton" onClick={() => handleDownload(0)}>Download</button>
+                <div className='convertedImageSection_images'>
+                  <ImageGalleryModal images = {converted_png_image}/>
+                </div>
+                <button id="downloadButton" onClick={() => handleDownload(0)}>Download</button>
               </div>
               <div className='dicomMetadataSection'>
                 {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
-                    <button id="downloadMetaDataButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
+                    <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
                 } 
               </div>
