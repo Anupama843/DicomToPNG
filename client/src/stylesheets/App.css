@@ -40,21 +40,29 @@
 
 .dicomFileOrFolderUploadSection {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .fileOrFolderSection {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items:end;
 }
 
 .fileOrFolderUploadOptionSection {
-  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
 }
 
 .folderDropDownSection {
   margin-left: 1rem;
+}
+
+.folderDownloadSection {
+  margin-left: 1rem;
+  padding-bottom: 0;
 }
 
 input::file-selector-button, #convertButton, .subFolderSection select{
@@ -172,12 +180,23 @@ input::file-selector-button, #convertButton, .subFolderSection select{
   animation: loader-inner 2s infinite ease-in;
 }
 
+.logoHeader{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
 .logoHeader .logo img {
   height: 80px;
   width: auto;
   border: 2px solid white;
   border-radius: 50%;
   margin: 0;
+}
+
+.logoHeader h1{
+  margin-left: 1rem;
 }
 
 /* a:link {

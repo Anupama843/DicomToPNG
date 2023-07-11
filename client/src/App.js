@@ -25,6 +25,7 @@ function App() {
   const [selectedSubfolderDicomFrame, setSelectedSubfolderDicomFrame] = useState('');
   const [dicomFilename, setDicomFilename] = useState('');
   const [showContactInformation, setShowContactInformation] = useState(false);
+  const [subfolderMetadata, setSubfolderMetadata] = useState(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -235,6 +236,89 @@ function App() {
     return result
   }
 
+  const handleDownloadFolder = () => {
+    const zip = new JSZip();
+    
+    // Create subfolder for images and metadata
+    
+    if(subfolders.length > 0){
+      subfolders.map((subfolder) => {
+
+        console.log("inside subfolder loop");
+        
+        const filename = subfolder.subfolder;
+        
+        const sub_folder = zip.folder(subfolder.subfolder);
+        const image_folder = sub_folder.folder('images');
+
+        const errorMessage = subfolder.converted_files.map((file) => file.error) ? subfolder.converted_files.map((file) => file.error) : '';
+          
+        if(errorMessage[0] === undefined){
+          // Save images to subfolder
+          const dicomFrame = subfolder.converted_files.map((file) => file.dicomframe) ? subfolder.converted_files.map((file) => file.dicomframe) : '';
+
+          const imageArray = subfolder.converted_files.map((file) => file.images) ? subfolder.converted_files.map((file) => file.images) : [];
+
+          console.log("dicom frame : " + dicomFrame);
+          
+          if(dicomFrame == 'single'){
+            console.log('inside single subfolder loop');
+            imageArray.map((images,ind) => {
+              images.forEach((image, index) => {
+                const filename = subfolder.subfolder;
+                image_folder.file(`${filename}_${index}.png`, image.original.replace('data:image/png;base64,', ''), { base64: true });
+              });
+            });
+          }else if (dicomFrame == 'multi'){
+            console.log('inside multi subfolder loop');
+            imageArray.map((multiImages,index1) => {
+              multiImages.map((images, index2) => {
+                images.forEach((image, index) => {
+                  const filename = subfolder.subfolder;
+                  image_folder.file(`${filename}_${index}.png`, image.original.replace('data:image/png;base64,', ''), { base64: true });
+                });
+              });
+            });
+          }
+          
+
+          const metadataArray = subfolder.converted_files.map((file) => file.metadata) ? subfolder.converted_files.map((file) => file.metadata) : null;
+
+          const metadata = metadataArray.length > 0 ? atob(metadataArray[0]) : null;
+
+          //Save metadata in the subfolder
+          sub_folder.file('metadata.csv', metadata);
+        }
+          
+      });
+
+      // Generate the zip file
+      zip.generateAsync({ type: 'blob' })
+      .then((content) => {
+        // Create a link element
+        
+        const link = document.createElement('a');
+        const filename = 'converted_files';
+        link.href = URL.createObjectURL(content);
+        link.download = `${filename}.zip`;
+
+        // Add the link to the document body
+        document.body.appendChild(link);
+
+        // Simulate a click on the link to trigger the download
+        link.click();
+
+        // Remove the link from the document body
+        document.body.removeChild(link);
+      })
+      .catch((error) => {
+        console.error('Error generating the zip file:', error);
+      });
+    }
+
+    
+  }
+
   const handleDownload = (image_index, downloadImage) => {
     // Create download link
     console.log("in png download function")
@@ -290,6 +374,8 @@ function App() {
     console.log("in metadata download function")
       
     let fileName = convertFileExtension(filename, ".csv")
+    console.log("csv metedata")
+    console.log(csvMetaData);
     saveAs('data:text/csv;charset=utf-8,' + encodeURIComponent(csvMetaData), fileName);
   }
 
@@ -325,7 +411,7 @@ function App() {
               </label>
             </div>
             <div className='fileOrFolderSection'>
-              <div className='uploadFileOrFolderSection'>
+              <div className='uploadOptionFileOrFolderSection'>
                 {!isFolderUpload && <input id= "fileUpload" type="file" onChange={handleFileChange} />}
                 {isFolderUpload && <input id="folderUpload" type="file" webkitdirectory = "" onChange={handleFileChange} />}
                 <button id="convertButton" onClick={handleConvert}>Convert</button>
@@ -340,6 +426,11 @@ function App() {
                     </option>
                   ))}
                   </select>
+                </div>}
+              </div>
+              <div className='folderDownloadSection'>
+                {isFolderUpload && subfolders && <div>
+                  <a href="#" onClick={handleDownloadFolder}>Download all files</a>
                 </div>}
               </div>
             </div>
