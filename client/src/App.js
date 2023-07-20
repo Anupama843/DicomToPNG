@@ -6,7 +6,7 @@ import ImageGalleryModal from './components/ImageGalleryModal';
 import JSZip, { files } from 'jszip';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
-import Logo from './Logo/logo_1.png';
+import Logo from './Logo/logo_2.png';
 
 
 function App() {
@@ -87,23 +87,31 @@ function App() {
 
   const handleFileChange = (e) => {
     
-    if(!isFolderUpload && e.target.files){
+    if(!isFolderUpload && e.target.files.length > 0){
+      console.log("single file upload option selected");
       setDicomFile(e.target.files[0]);
       setDicomFilename(e.target.files[0].name);
-    }else{
+      setError(null);
+    }else if(isFolderUpload && e.target.files.length > 0){
       // setDicomFolder(Array.from(e.target.files));
-      console.log("folder")
-      console.log(e.target.files)
+      console.log("Folder upload option selected")
       setDicomFolder(e.target.files);
+      setError(null);
+    }else{
+      setError("No file/folder uploaded. Please upload Dicom Image file");
+      setDicomFile(null);
+      setDicomFolder(null);
     }
     
-    setError(null)
     setIsConversionRequest(false);
     initialize();
   };
 
   const handleUploadOptionChange = (e) => {
     setIsFolderUpload(e.target.value === 'folder');
+    setIsConversionRequest(false);
+    setDicomFile(null);
+    setDicomFolder(null);
     initialize();
   };
 
@@ -120,87 +128,97 @@ function App() {
 
   const handleConvert = async () => {
     console.log("in convert method");
-    setIsConversionRequest(true);
-    const formData = new FormData();
-    if(!isFolderUpload){
-      formData.append('file', dicomFile);
+    if(error || (isFolderUpload && !dicomFolder) || (!isFolderUpload && !dicomFile)){
+      console.log("Encountered error before converting")
+      console.log(error);
+      let errorMessage = error == null ? "No file/folder uploaded. Please upload Dicom Image file" : error;
+      setError(errorMessage);
+      initialize();
+      setIsConversionRequest(false);
+
     }else{
-      console.log("folder data");
-      console.log(dicomFolder);
-      for (const file of dicomFolder) {
-        formData.append('files', file, file.name)
+      setIsConversionRequest(true);
+      const formData = new FormData();
+      if(!isFolderUpload){
+        formData.append('file', dicomFile);
+      }else{
+        console.log("folder data");
+        console.log(dicomFolder);
+        for (const file of dicomFolder) {
+          formData.append('files', file, file.name)
+        }
       }
-    }
 
-    setIsConvertInProgress(true);
-    setError(null);
-    initialize();
+      setIsConvertInProgress(true);
+      setError(null);
+      initialize();
 
-    // alert window asking user whether to allow the system to save the dicom file 
-    const shouldSave = window.confirm('Do you want to save the file locally?');
-    if (shouldSave) {
-      console.log("Fetching save file")
-      fetch('/saveFile', {
+      // alert window asking user whether to allow the system to save the dicom file 
+      const shouldSave = window.confirm('Do you want to save the file locally?');
+      if (shouldSave) {
+        console.log("Fetching save file")
+        fetch('/saveFile', {
+          method: 'POST',
+          body: formData,
+        })
+          .then(response => response.text())
+          .then(text => console.log(text))
+          .catch(error => console.error(error));
+      }
+
+      console.log("printing form data before calling convert");
+      console.log(formData)
+
+      const response = await fetch('/convert', {
         method: 'POST',
-        body: formData,
-      })
-        .then(response => response.text())
-        .then(text => console.log(text))
-        .catch(error => console.error(error));
-    }
+        body: formData
+      });
+      console.log("fetch called");
+      const data = await response.json();
+      console.log("data:");
+      console.log(data);
+      setIsConvertInProgress(false)
+      
+      if (data.success) {
+        let folder_data = null;
+        let subfolder_data = null;
+        console.log("data success");
+        if(isFolderUpload){
+          console.log("folder upload result");
+          folder_data = data.folder;
+          console.log("folder data :");
+          console.log(folder_data);
+          setSubfolders(folder_data);
+          subfolder_data = folder_data && folder_data.length > 0 ? folder_data[0].subfolder : null; 
+          setSelectedSubfolder(subfolder_data );
+          
+          console.log("calling subfolder data function");
 
-    console.log("printing form data before calling convert");
-    console.log(formData)
-
-    const response = await fetch('/convert', {
-      method: 'POST',
-      body: formData
-    });
-    console.log("fetch called");
-    const data = await response.json();
-    console.log("data:");
-    console.log(data);
-    setIsConvertInProgress(false)
-    
-    if (data.success) {
-      let folder_data = null;
-      let subfolder_data = null;
-      console.log("data success");
-      if(isFolderUpload){
-        console.log("folder upload result");
-        folder_data = data.folder;
-        console.log("folder data :");
-        console.log(folder_data);
-        setSubfolders(folder_data);
-        subfolder_data = folder_data && folder_data.length > 0 ? folder_data[0].subfolder : null; 
-        setSelectedSubfolder(subfolder_data );
-        
-        console.log("calling subfolder data function");
-
-        if(folder_data && subfolder_data){
-          subFolderData(folder_data,subfolder_data);
+          if(folder_data && subfolder_data){
+            subFolderData(folder_data,subfolder_data);
+          }
+          
+        }
+        if (!isFolderUpload && data.image) {
+          setSinglePngImage(`data:image/png;base64,${data.image}`);
+          // setSinglePngImage(data.image);
+          setMultiplePngImages(null);
+          setSubfolders('');
+        } else if (!isFolderUpload && data.images) {
+          setSinglePngImage(null);
+          setMultiplePngImages(data.images);
+          setSubfolders('');
         }
         
+        setCsvMetaData(atob(data.metadata))
+        setError(null);
+      } else {
+        console.log("Encountered error")
+        console.log(data.error);
+        setIsConversionRequest(false);
+        setError(data.error);
+        initialize();
       }
-      if (!isFolderUpload && data.image) {
-        setSinglePngImage(`data:image/png;base64,${data.image}`);
-        // setSinglePngImage(data.image);
-        setMultiplePngImages(null);
-        setSubfolders('');
-      } else if (!isFolderUpload && data.images) {
-        setSinglePngImage(null);
-        setMultiplePngImages(data.images);
-        setSubfolders('');
-      }
-      
-      setCsvMetaData(atob(data.metadata))
-      setError(null);
-    } else {
-      console.log("Encountered error")
-      console.log(data.error);
-      setIsConversionRequest(false);
-      setError(data.error);
-      initialize();
     }
   };
 
@@ -439,7 +457,7 @@ function App() {
         
         </div>
         <div>
-          <a href="#contactInformation" onClick={handleContactInformation}>Contact</a>
+          <a href="#contactInformation" onClick={handleContactInformation}>Contact Us</a>
         </div>
       </div>
       {error &&
@@ -462,9 +480,8 @@ function App() {
                 <div className='convertedImageSection'>
                   <h2> Converted PNG Image </h2>
                   <ImageGalleryModal images = {image}/>
-                  <div className='button-container'>
-                    <button id="downloadButton" onClick={() => handleDownload(0, image)}>Download</button>
-                  </div>
+                  <button id="downloadButton" onClick={() => handleDownload(0, image)}>Download</button>
+                  
                 </div>
                 <div className='dicomMetadataSection'>
                   {csvMetaData && <div className='csvMetadataSection'>

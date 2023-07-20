@@ -5,8 +5,7 @@
   border-style:groove;
   border-width: medium;
   height: 100%;
-  border: 2px solid #9370db;
-  /*align-content: flex-start*/
+  border: 2px solid gray;
   flex-wrap: nowrap;
   font-family: 'Georgia';
 }
@@ -17,12 +16,8 @@
   flex-direction: row;
   justify-content: space-between;
   padding: 10px; 
-  border-style:groove;
-  border-width: medium;
-  /* background-color:#9370db; */
-  /* background-color: rgb(141, 201, 54); */
   background-color: green;
-  align-items:end;
+  align-items:center;
   font-size: large;
 }
 .appHeader h1{
@@ -31,23 +26,24 @@
 }
 
 .dicomFileHandlingSection {
-  margin-top: 2rem;
   color: white;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+  align-items: center;
 }
 
 .dicomFileOrFolderUploadSection {
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .fileOrFolderSection {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  align-items:end;
+  align-items:center;
 }
 
 .fileOrFolderUploadOptionSection {
@@ -88,7 +84,6 @@ input::file-selector-button, #convertButton, .subFolderSection select{
 .dicomFileDetails {
   display: flex;
   flex-direction: row;
-  border-style:groove;  
   min-height:100vh
 }
 
@@ -176,7 +171,7 @@ input::file-selector-button, #convertButton, .subFolderSection select{
   vertical-align: top;
   display: inline-block;
   width: 100%;
-  background-color: #9370db;
+  background-color: green;
   animation: loader-inner 2s infinite ease-in;
 }
 

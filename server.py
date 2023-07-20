@@ -137,7 +137,6 @@ def convert_single_dicom_file_to_png(dicom_file):
     print("filename : " + filename)
     ds = pydicom.dcmread(dicom_file)
     print("ds ========>>>> ")
-    print(ds)
 
     metadata = metadata_extraction.dicom_to_csv(ds)
 
