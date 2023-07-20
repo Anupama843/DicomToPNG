@@ -25,3 +25,6 @@ table{
     overflow: auto;
 
 }
+tr {
+    border: 1px solid yellow;
+}
