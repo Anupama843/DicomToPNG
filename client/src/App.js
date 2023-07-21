@@ -481,15 +481,13 @@ function App() {
                   <h2> Converted PNG Image </h2>
                   <ImageGalleryModal images = {image}/>
                   <button id="downloadButton" onClick={() => handleDownload(0, image)}>Download</button>
-                  
                 </div>
-                <div className='dicomMetadataSection'>
-                  {csvMetaData && <div className='csvMetadataSection'>
+                {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
                     <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                     </div>
-                  }
-                </div>
+                }
+                
               </>
             ))}
             {selectedSubfolderDicomFrame == 'multi' && selectedSubfolderImages.map((images,index) => (
@@ -513,38 +511,29 @@ function App() {
             {multiplePngImages && (
             <>
             <div className='convertedImageSection'>
-              
               <h2> Converted PNG Image </h2>
-              <div className='convertedImageSection_images'>
-                <ImageGalleryModal images = {multiplePngImages}/>
-              </div>
+              <ImageGalleryModal images = {multiplePngImages}/>
               <button id="downloadButton" onClick={() => handleDownload()}>Download</button>
             </div>
-            <div className='dicomMetadataSection'>
-              {csvMetaData && <div className='csvMetadataSection'>
+            {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
                     <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
-              }
-            </div>
+            }
             </>
             )}
             {singlePngImage && (
               <>
               <div className='convertedImageSection'>
                 <h2> Converted PNG Image </h2>
-                <div className='convertedImageSection_images'>
-                  <ImageGalleryModal images = {converted_png_image}/>
-                </div>
+                <ImageGalleryModal images = {converted_png_image}/>
                 <button id="downloadButton" onClick={() => handleDownload(0)}>Download</button>
               </div>
-              <div className='dicomMetadataSection'>
-                {csvMetaData && <div className='csvMetadataSection'>
+              {csvMetaData && <div className='csvMetadataSection'>
                     <CsvPreview metadata={csvMetaData} />
                     <button id="downloadButton" onClick={() => downloadMetaData(dicomFilename)}>Download</button>
                   </div>
-                } 
-              </div>
+              } 
               </>
               )}
         </div>}
