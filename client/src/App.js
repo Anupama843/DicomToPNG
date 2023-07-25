@@ -6,7 +6,7 @@ import ImageGalleryModal from './components/ImageGalleryModal';
 import JSZip, { files } from 'jszip';
 import AboutPage from './components/AboutPage';
 import ContactPage from './components/ContactPage';
-import Logo from './Logo/logo_2.png';
+import Logo from './Logo/logo_4.png';
 
 
 function App() {
@@ -25,18 +25,22 @@ function App() {
   const [selectedSubfolderDicomFrame, setSelectedSubfolderDicomFrame] = useState('');
   const [dicomFilename, setDicomFilename] = useState('');
   const [showContactInformation, setShowContactInformation] = useState(false);
-  const [subfolderMetadata, setSubfolderMetadata] = useState(null);
+  const [startTimer, setStartTimer] = useState(false);
+  let fifteenMinutesTimeout =15 * 60 * 1000
+  let fifteenSecTimeout = 45 * 1000
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      alert('Please upload the file again.');
-      setTimeout(() => {
-        window.location.reload();
-      },895000); // Refresh after 5 seconds of showing the message
-    }, 900000); // Refresh every 15 minutes (15 * 60 * 1000 milliseconds)
-
-    return () => clearTimeout(timer);
-  }, []);
+    if (startTimer) {
+      const timer = setTimeout(() => {
+        alert('Please download the file, page will be refreshed in 15 second.');
+        setTimeout(() => {
+          setStartTimer(false)
+          window.location.reload();
+        },fifteenMinutesTimeout - fifteenSecTimeout); // Refresh after 15 seconds of showing the message
+      }, fifteenMinutesTimeout); // Refresh every 15 minutes (15 * 60 * 1000 milliseconds)
+      return () => clearTimeout(timer);  
+    }
+  }, [startTimer]);
 
   const initialize = () => {
     setSinglePngImage(null);
@@ -178,7 +182,8 @@ function App() {
       console.log("data:");
       console.log(data);
       setIsConvertInProgress(false)
-      
+      setStartTimer(true)
+
       if (data.success) {
         let folder_data = null;
         let subfolder_data = null;
@@ -360,7 +365,7 @@ function App() {
         images = downloadImage;
         
       }else{
-        console.log("single filr")
+        console.log("single file")
         fileName = convertFileExtension(dicomFile.name, "")
         images = multiplePngImages;
       }
@@ -403,9 +408,11 @@ function App() {
     setShowContactInformation(true);
     setIsConversionRequest(false);
     setIsConvertInProgress(false);
+    // setStartTimer()
   };
 
   return (
+  
     <div className='dicomImageConverterApp'>
       <div className='appHeader'>
         <div className='logoHeader'>
@@ -542,6 +549,7 @@ function App() {
         </div>
         }
     </div>
+    
   );
 }
 

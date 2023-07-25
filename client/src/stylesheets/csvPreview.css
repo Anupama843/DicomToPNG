@@ -16,15 +16,20 @@ td {
 }
 table{
     table-layout: fixed;
-    border-collapse: collapse;
+    border-collapse: separate;
     width: 100%;
 }
 .table-container {
-    height:725px;
-    max-height: 800px;
-    overflow: auto;
-
+    table-layout: fixed;
+    max-height: 740px;
+    overflow-x: hidden;
+    height: 100%;
 }
-tr {
-    border: 1px solid yellow;
+
+
+.Group, .Elem, .Description, .VR {
+    width: 20%;
+}
+.Value {
+    width: 50%;
 }
