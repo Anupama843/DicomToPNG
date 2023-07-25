@@ -4,7 +4,6 @@ import Papa from 'papaparse';
 
 function CsvPreview({ metadata }) {
 
-    const [array, setArray] = useState([]);
     //State to store table Column name
     const [tableRows, setTableRows] = useState([]);
 
@@ -46,7 +45,7 @@ function CsvPreview({ metadata }) {
                     <thead>
                         <tr key={"header"}>
                             {Object.values(tableRows).map((key) => (
-                                <th>{key}</th>
+                                <th className={key}>{key}</th>
                             ))}
                         </tr>
                     </thead>
